@@ -32,6 +32,8 @@ def create_run(db,data,user):
 def export_run(db,rid):
     row=get_run(db,rid)
     if row.status!="completed" or not db.query(CapacityNote).filter_by(run_id=rid,status="approved").first():raise HTTPException(403,"仅获批的完成运行可导出")
-    out=io.StringIO();w=csv.writer(out);w.writerow(['replication','mean_wait_minutes','mean_system_minutes','wait_probability','busy_fraction_window','window_minutes','retained_customers','arrival_spawn_key','service_spawn_key','analytic_wait_minutes','input_hash'])
-    for x in row.result['replications']:w.writerow([x[k] for k in ['replication','mean_wait_minutes','mean_system_minutes','wait_probability','busy_fraction_window','window_minutes','retained_customers','arrival_spawn_key','service_spawn_key']]+[row.result['analytical']['mean_wait_minutes'],row.result['input_hash']])
+    result=row.result;analytic=result.get('analytical') or {};patience=result.get('patience_minutes')
+    def cell(value):return '' if value is None else value
+    out=io.StringIO();w=csv.writer(out);w.writerow(['replication','mean_wait_minutes','mean_system_minutes','wait_probability','busy_fraction_window','window_minutes','retained_customers','arrival_spawn_key','service_spawn_key','analytic_wait_minutes','input_hash','patience_minutes','served_customers','abandoned_customers','served_total','abandoned_total','mean_wait_served_minutes','mean_wait_abandoned_minutes','abandon_probability','analytical_note'])
+    for x in result['replications']:w.writerow([x[k] for k in ['replication','mean_wait_minutes','mean_system_minutes','wait_probability','busy_fraction_window','window_minutes','retained_customers','arrival_spawn_key','service_spawn_key']]+[cell(analytic.get('mean_wait_minutes')),result['input_hash'],cell(patience),cell(x.get('served_customers')),cell(x.get('abandoned_customers')),cell(x.get('served_total')),cell(x.get('abandoned_total')),cell(x.get('mean_wait_served_minutes')),cell(x.get('mean_wait_abandoned_minutes')),cell(x.get('abandon_probability')),result.get('analytical_note') or ''])
     return out.getvalue()

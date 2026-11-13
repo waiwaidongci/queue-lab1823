@@ -7,3 +7,4 @@ class RunInput(BaseModel):
     replications:int=Field(default=20,ge=5,le=40)
     seed:int=Field(default=2026,ge=0,le=2147483647)
     confidence:float=Field(default=.95,ge=.8,le=.99,allow_inf_nan=False)
+    patience_minutes:float|None=Field(default=None,ge=.01,le=600,allow_inf_nan=False)

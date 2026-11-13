@@ -12,6 +12,7 @@ class SimulationRun(Base):
     replications:Mapped[int]
     seed:Mapped[int]
     confidence:Mapped[float]
+    patience_minutes:Mapped[float|None]=mapped_column(nullable=True)
     input_snapshot:Mapped[dict]=mapped_column(JSON)
     status:Mapped[str]=mapped_column(default="queued")
     result:Mapped[dict]=mapped_column(JSON,default=dict)
